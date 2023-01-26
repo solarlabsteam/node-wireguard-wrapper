@@ -1,12 +1,22 @@
 'use strict';
 
 const {exec} = require('child_process');
+const path = require('path')
+const {platform} = require('os')
 const StatusInterface = require('../model/status/Interface');
 const StatusPeer = require('../model/status/Peer');
 const ConfigInterface = require('../model/config/Interface');
 const ConfigPeer = require('../model/config/Peer');
 
 class Wg {
+	static commands = {
+		'win32': path.join('../bin/WireGuard', 'wg.exe'),
+		'linux': 'wg'
+	}
+
+	static get command() {
+		return Wg.commands[platform()]
+	}
 
 	static show(device){
 		if(!device){
@@ -16,7 +26,7 @@ class Wg {
 			if(!/^[A-Za-z0-9]*$/.test(device)) {
 				return reject("Invalid device/interface name");
 			}
-			exec(`wg show ${device} dump`, function(error, stdout, stderr){
+			exec(`${Wg.command} show ${device} dump`, function(error, stdout, stderr){
 				if(error){
 					return reject(`Exec error: ${error}`);
 				}
@@ -67,7 +77,7 @@ class Wg {
 			if(!/^[A-Za-z0-9]*$/.test(device)) {
 				return reject('Invalid device/interface name');
 			}
-			exec(`wg showconf ${device}`, function(error, stdout, stderr){
+			exec(`${Wg.command} showconf ${device}`, function(error, stdout, stderr){
 				if(error){
 					return reject(`Exec error: ${error}`);
 				}
@@ -108,7 +118,7 @@ class Wg {
 
 	static genkey(){
 		return new Promise(function(resolve, reject){
-			exec(`wg genkey`, function(error, stdout, stderr){
+			exec(`${Wg.command} genkey`, function(error, stdout, stderr){
 				if(error){
 					return reject(`Exec error: ${error}`);
 				}
@@ -123,7 +133,7 @@ class Wg {
 
 	static genpsk(){
 		return new Promise(function(resolve, reject){
-			exec(`wg genpsk`, function(error, stdout, stderr){
+			exec(`${Wg.command} genpsk`, function(error, stdout, stderr){
 				if(error){
 					return reject(`Exec error: ${error}`);
 				}
@@ -142,7 +152,7 @@ class Wg {
 				return reject('Invalid private key');
 			}
 			
-			exec(`echo '${privateKey}' | wg pubkey`, function(error, stdout, stderr){
+			exec(`echo '${privateKey}' | ${Wg.command} pubkey`, function(error, stdout, stderr){
 				if(error){
 					return reject(`Exec error: ${error}`);
 				}
