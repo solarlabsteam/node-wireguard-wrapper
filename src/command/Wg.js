@@ -9,24 +9,28 @@ const ConfigInterface = require('../model/config/Interface');
 const ConfigPeer = require('../model/config/Peer');
 
 class Wg {
-	static commands = {
-		'win32': path.join('../bin/WireGuard', 'wg.exe'),
+	commands = {
+		'win32': 'wg.exe',
 		'linux': 'wg'
 	}
 
-	static get command() {
-		return Wg.commands[platform()]
+	constructor(pathToBinary = '') {
+		this.path = pathToBinary
 	}
 
-	static show(device){
+	get command() {
+		return path.join(this.path, this.commands[platform()])
+	}
+
+	show(device){
 		if(!device){
 			device = 'all';
 		}
-		return new Promise(function(resolve, reject){
+		return new Promise((resolve, reject) => {
 			if(!/^[A-Za-z0-9]*$/.test(device)) {
 				return reject("Invalid device/interface name");
 			}
-			exec(`${Wg.command} show ${device} dump`, function(error, stdout, stderr){
+			exec(`${this.command} show ${device} dump`, function(error, stdout, stderr){
 				if(error){
 					return reject(`Exec error: ${error}`);
 				}
@@ -68,8 +72,8 @@ class Wg {
 		});
 	}
 
-	static showconf(device){
-		return new Promise(function(resolve, reject){
+	showconf(device){
+		return new Promise((resolve, reject) => {
 			if(!device){
 				return reject('No device/interface specified');
 			}
@@ -77,7 +81,7 @@ class Wg {
 			if(!/^[A-Za-z0-9]*$/.test(device)) {
 				return reject('Invalid device/interface name');
 			}
-			exec(`${Wg.command} showconf ${device}`, function(error, stdout, stderr){
+			exec(`${this.command} showconf ${device}`, function(error, stdout, stderr){
 				if(error){
 					return reject(`Exec error: ${error}`);
 				}
@@ -116,9 +120,9 @@ class Wg {
 		});
 	}
 
-	static genkey(){
-		return new Promise(function(resolve, reject){
-			exec(`${Wg.command} genkey`, function(error, stdout, stderr){
+	genkey(){
+		return new Promise((resolve, reject) => {
+			exec(`${this.command} genkey`, function(error, stdout, stderr){
 				if(error){
 					return reject(`Exec error: ${error}`);
 				}
@@ -131,9 +135,9 @@ class Wg {
 		});
 	}
 
-	static genpsk(){
-		return new Promise(function(resolve, reject){
-			exec(`${Wg.command} genpsk`, function(error, stdout, stderr){
+	genpsk(){
+		return new Promise((resolve, reject) => {
+			exec(`${this.command} genpsk`, function(error, stdout, stderr){
 				if(error){
 					return reject(`Exec error: ${error}`);
 				}
@@ -146,13 +150,13 @@ class Wg {
 		});
 	}
 
-	static pubkey(privateKey){
-		return new Promise(function(resolve, reject){
+	pubkey(privateKey){
+		return new Promise((resolve, reject) => {
 			if(!/^[A-Za-z0-9+/=]*$/.test(privateKey)){
 				return reject('Invalid private key');
 			}
 			
-			exec(`echo '${privateKey}' | ${Wg.command} pubkey`, function(error, stdout, stderr){
+			exec(`echo '${privateKey}' | ${this.command} pubkey`, function(error, stdout, stderr){
 				if(error){
 					return reject(`Exec error: ${error}`);
 				}
