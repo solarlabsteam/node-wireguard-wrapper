@@ -11,7 +11,8 @@ const ConfigPeer = require('../model/config/Peer');
 class Wg {
 	commands = {
 		'win32': 'wg.exe',
-		'linux': 'wg'
+		'linux': 'wg',
+		'darwin': 'wg'
 	}
 
 	constructor(pathToBinary = '') {
