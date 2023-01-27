@@ -156,7 +156,7 @@ class Wg {
 				return reject('Invalid private key');
 			}
 			
-			exec(`echo '${privateKey}' | ${this.command} pubkey`, function(error, stdout, stderr){
+			exec(`echo ${privateKey} | ${this.command} pubkey`, function(error, stdout, stderr){
 				if(error){
 					return reject(`Exec error: ${error}`);
 				}
